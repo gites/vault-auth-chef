@@ -1,0 +1,77 @@
+image: "test/chefdk"
+
+stages:
+  - lint-tests
+  - unit-tests
+  - dev-deploy
+  - prod-deploy
+  - role-processor
+  - set-tag
+
+rubocop:
+  except:
+    - tags
+  stage: lint-tests
+  tags: [ lint-tests,docker ]
+  script: [ chef exec rubocop . ]
+
+foodcritic:
+  except:
+    - tags
+  stage: lint-tests
+  tags: [ lint-tests,docker ]
+  script: [ chef exec foodcritic . ]
+
+rspec:
+  except:
+    - tags
+  stage: unit-tests
+  tags: [ unit-tests,docker ]
+  script: [ chef exec rspec spec ]
+
+deploy_to_dev_chef_server:
+  stage: dev-deploy
+  only:
+    - /^dev_.*$/
+  tags:
+    - deploy,docker
+  dependencies:
+    - foodcritic
+    - rubocop
+    - rspec
+  script:
+    - knife upload $CI_PROJECT_NAME --freeze
+
+deploy_to_prod_chef_server:
+  stage: prod-deploy
+  only:
+    - master
+  tags:
+    - deploy,docker
+  dependencies:
+    - foodcritic
+    - rubocop
+    - rspec
+  script:
+    - knife upload $CI_PROJECT_NAME --freeze
+
+role-processor:
+  stage: role-processor
+  tags:
+    - deploy,docker
+  dependencies:
+    - deploy_to_prod_chef_server
+    - deploy_to_dev_chef_server
+  script:
+    - chef_processor
+
+set_tag_in_master:
+  stage: set-tag
+  only:
+    - master
+  tags:
+    - deploy,docker
+  dependencies:
+    - deploy_to_prod_chef_server
+  script:
+    - set_tag 
