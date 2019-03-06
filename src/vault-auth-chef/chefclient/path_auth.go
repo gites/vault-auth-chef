@@ -129,6 +129,7 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		Name:    client,
 		Key:     key,
 		BaseURL: config.ChefServer,
+		SkipSSL: config.SkipTLS,
 	})
 
 	if err != nil {
