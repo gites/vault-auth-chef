@@ -97,7 +97,7 @@ information, team, behavior configuration tunables, and TTLs. For example:
 
     $ vault write auth/chef/config \
         chef_server="127.0.0.1" \
-        check_tls=false
+        skip_tls=false
 
 For more information and examples, please see the online documentation.
 
@@ -109,9 +109,9 @@ For more information and examples, please see the online documentation.
 						Description: "Slack OAuth access token for your Slack application.",
 					},
 
-					"check_tls": &framework.FieldSchema{
+					"skip_tls": &framework.FieldSchema{
 						Type:        framework.TypeBool,
-						Description: "Check certificate of chef server.",
+						Description: "Skip checking the certificate of chef server.",
 					},
 
 					"anyone_policies": &framework.FieldSchema{

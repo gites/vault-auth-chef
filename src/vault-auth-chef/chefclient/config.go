@@ -11,7 +11,7 @@ import (
 // config represents the internally stored configuration information.
 type config struct {
 	ChefServer string `json:"chef_server" structs:"chef_server"`
-	CheckTLS   bool   `json:"check_tls" structs:"check_tls"`
+	SkipTLS    bool   `json:"skip_tls" structs:"skip_tls"`
 	// AnyonePolicies is the list of policies to apply to any valid Chef clients.
 	AnyonePolicies []string `json:"anyone_policies" structs:"anyone_policies,omitempty"`
 

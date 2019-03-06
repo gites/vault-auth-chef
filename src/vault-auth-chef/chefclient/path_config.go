@@ -41,7 +41,7 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	}
 
 	// Get the tunable options
-	checkTLS := data.Get("check_tls").(bool)
+	skipTLS := data.Get("skip_tls").(bool)
 	anyonePolicies := data.Get("anyone_policies").([]string)
 
 	// Calculate TTLs, if supplied
@@ -51,7 +51,7 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	// Built the entry
 	entry, err := logical.StorageEntryJSON("config", &config{
 		ChefServer:     chefServer,
-		CheckTLS:       checkTLS,
+		SkipTLS:        skipTLS,
 		AnyonePolicies: anyonePolicies,
 		TTL:            ttl,
 		MaxTTL:         maxTTL,
