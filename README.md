@@ -19,7 +19,7 @@ Binary file of plugin is located at `build` directory
 
 Plugin contains follow configuration options:
 - `chef_server` - full url to your chef server e.g. https://chefserver/myorg
-- `check_tls` - Check certificate of chef server
+- `skip_tls` - Check certificate of chef server
 - `anyone_policies` - policies for apply to any clients
 - `ttl` - Duration after which authentication will expire
 - `max_ttl` - Maximum duration after which authentication will expire 
