@@ -36,7 +36,10 @@ $ vault auth enable -path="chef" -plugin-name=vault-auth-chef plugin
 ```
 
 ## Configuration
+Options in `[]` are optional.
 
 ```
-$ vault write auth/chef/config chef_server='https://yourChefServer/organizations/yourOrg/'
+$ vault write auth/chef/config chef_server='https://yourChefServer/organizations/yourOrg/' [anyone_policies=anyone_policy1,anyone_policy2] [skip_tls=true]
+$ vault write auth/chef/map/roles/role_name1 policy=policy_name1
+$ vault write auth/chef/map/hosts/host_name2 policy=host_policy2
 ```
