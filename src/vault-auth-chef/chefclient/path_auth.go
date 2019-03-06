@@ -142,13 +142,13 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		b.logger.Warn(fmt.Sprintf("Chef auth error while get nodes: %s", err.Error()))
 		return nil, errors.Wrap(err, "nodes.list")
 	}
-	node_roles := make([]string, 0)
-	role_re := regexp.MustCompile("^role\\[(.*)\\]$")
+	nodeRoles := make([]string, 0)
+	roleRe := regexp.MustCompile("^role\\[(.*)\\]$")
 	for _, role := range node.RunList {
 		b.logger.Debug(fmt.Sprintf("Client %s run_list: %s", client, role))
-		res := role_re.FindStringSubmatch(role)
+		res := roleRe.FindStringSubmatch(role)
 		if len(res) == 2 {
-			node_roles = append(node_roles, res[1])
+			nodeRoles = append(nodeRoles, res[1])
 		}
 	}
 
@@ -158,12 +158,12 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		b.logger.Warn(fmt.Sprintf("error while accumulate hosts policies: %s", err.Error()))
 		return nil, errors.Wrap(err, "client policies")
 	}
-	rolesPolicies, err := b.RolesMap.Policies(ctx, req.Storage, node_roles...)
+	rolesPolicies, err := b.RolesMap.Policies(ctx, req.Storage, nodeRoles...)
 	if err != nil {
 		b.logger.Warn(fmt.Sprintf("error while accumulate roles policies: %s", err.Error()))
 		return nil, errors.Wrap(err, "run_list policies")
 	}
-	b.logger.Debug(fmt.Sprintf("Client %s role %s policy: %s", client, strings.Join(node_roles, ","), strings.Join(rolesPolicies, ",")))
+	b.logger.Debug(fmt.Sprintf("Client %s role %s policy: %s", client, strings.Join(nodeRoles, ","), strings.Join(rolesPolicies, ",")))
 	policies := make([]string, 0, len(hostsPolicies)+len(rolesPolicies))
 	policies = append(policies, hostsPolicies...)
 	policies = append(policies, rolesPolicies...)
