@@ -120,6 +120,12 @@ For more information and examples, please see the online documentation.
 							"everyone, even unmapped clients.",
 					},
 
+					"data_bags": &framework.FieldSchema{
+						Type: framework.TypeCommaStringSlice,
+						Description: "Comma-separated list of Chef Serer data bags to " +
+							"look for the client data bag file.",
+					},
+
 					"ttl": &framework.FieldSchema{
 						Type:        framework.TypeDurationSecond,
 						Description: "Duration after which authentication will expire.",

@@ -14,6 +14,8 @@ type config struct {
 	SkipTLS    bool   `json:"skip_tls" structs:"skip_tls"`
 	// AnyonePolicies is the list of policies to apply to any valid Chef clients.
 	AnyonePolicies []string `json:"anyone_policies" structs:"anyone_policies,omitempty"`
+	// DataBags is the list of Ched Server data bags that should be checked for client data bag file.
+	DataBags []string `json:"data_bags" structs:"data_bags"`
 
 	// TTL and MaxTTL are the default TTLs.
 	TTL    time.Duration `json:"ttl" structs:"ttl,omitempty"`

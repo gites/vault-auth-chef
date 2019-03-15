@@ -40,6 +40,12 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 		return errMissingField("chef_server"), nil
 	}
 
+	// Get the data bags
+	dataBags := data.Get("data_bags").([]string)
+	if len(dataBags) == 0 {
+		return errMissingField("data_bags"), nil
+	}
+
 	// Get the tunable options
 	skipTLS := data.Get("skip_tls").(bool)
 	anyonePolicies := data.Get("anyone_policies").([]string)
@@ -53,6 +59,7 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 		ChefServer:     chefServer,
 		SkipTLS:        skipTLS,
 		AnyonePolicies: anyonePolicies,
+		DataBags:       dataBags,
 		TTL:            ttl,
 		MaxTTL:         maxTTL,
 	})
