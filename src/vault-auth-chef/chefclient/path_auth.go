@@ -148,10 +148,12 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		if err != nil {
 			b.logger.Debug(fmt.Sprintf("Looking for data bag in: %s", err.Error()))
 		}
+
 		if err == nil {
 			break
 		}
 	}
+
 	// Check if we realy got the data bag.
 	jsonData, err := json.Marshal(dataBag)
 	if err != nil {
