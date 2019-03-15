@@ -140,7 +140,7 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 	}
 
 	// Get data bags
-	b.logger.Info(fmt.Sprintf("databagi: %v", config.DataBags))
+
 	var dataBag interface{}
 	for _, dataBagPath := range config.DataBags {
 		dataBag, err = c.DataBags.GetItem(dataBagPath, client)
