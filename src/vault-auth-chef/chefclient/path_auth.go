@@ -148,7 +148,6 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		if err != nil {
 			b.logger.Debug(fmt.Sprintf("Looking for data bag in: %s", err.Error()))
 		}
-
 		if err == nil {
 			break
 		}
