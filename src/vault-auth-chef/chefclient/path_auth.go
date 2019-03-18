@@ -2,6 +2,7 @@ package chefclient
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/vault/logical"
 	"github.com/hashicorp/vault/logical/framework"
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 )
 
 // verifyResp is a wrapper around fields returned from verifyCreds.
@@ -137,20 +139,40 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		return nil, errors.Wrap(err, "auth.test")
 	}
 
+	// Get data bags
+	// Iterate over configured data bags indexes and try to find the one for our client.
+	var dataBag interface{}
+	for _, dataBagPath := range config.DataBags {
+		dataBag, err = c.DataBags.GetItem(dataBagPath, client)
+		if err != nil {
+			b.logger.Debug(fmt.Sprintf("Looking for data bag in: %s", err.Error()))
+		}
+		if err == nil {
+			break
+		}
+	}
+	// Check if we realy got the data bag.
+	jsonData, err := json.Marshal(dataBag)
+	if err != nil {
+		b.logger.Warn(fmt.Sprintf("Chef auth error while geting data bags: %s", err.Error()))
+		return nil, errors.Wrap(err, "data_bags.list")
+	}
+	dataBagMapRunList := gjson.GetBytes(jsonData, "run_list")
+	nodeRoles := make([]string, 0)
+	roleRe := regexp.MustCompile("^role\\[(.*)\\]$")
+	for _, role := range dataBagMapRunList.Array() {
+		b.logger.Debug(fmt.Sprintf("Client %s run_list: %s", client, role))
+		res := roleRe.FindStringSubmatch(role.String())
+		if len(res) == 2 {
+			nodeRoles = append(nodeRoles, res[1])
+		}
+	}
+
 	// Get node
 	node, err := c.Nodes.Get(client)
 	if err != nil {
 		b.logger.Warn(fmt.Sprintf("Chef auth error while get nodes: %s", err.Error()))
 		return nil, errors.Wrap(err, "nodes.list")
-	}
-	nodeRoles := make([]string, 0)
-	roleRe := regexp.MustCompile("^role\\[(.*)\\]$")
-	for _, role := range node.RunList {
-		b.logger.Debug(fmt.Sprintf("Client %s run_list: %s", client, role))
-		res := roleRe.FindStringSubmatch(role)
-		if len(res) == 2 {
-			nodeRoles = append(nodeRoles, res[1])
-		}
 	}
 
 	// Accumulate all policies

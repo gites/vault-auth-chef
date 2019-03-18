@@ -421,6 +421,24 @@
 			"revisionTime": "2018-02-12T16:30:32Z"
 		},
 		{
+			"checksumSHA1": "IiKYeWteyF0x3VIqjBnLAXpiRJM=",
+			"path": "github.com/tidwall/gjson",
+			"revision": "181e11634d88481c14eeda620b056fdfaf330af9",
+			"revisionTime": "2019-02-17T02:21:12Z"
+		},
+		{
+			"checksumSHA1": "8jl+NYRKijAXkUwjpy89Q60q00A=",
+			"path": "github.com/tidwall/match",
+			"revision": "33827db735fff6510490d69a8622612558a557ed",
+			"revisionTime": "2018-12-10T10:08:38Z"
+		},
+		{
+			"checksumSHA1": "xvqu+P9YeaxJJ/ejjMkl8iXrSBk=",
+			"path": "github.com/tidwall/pretty",
+			"revision": "65a9db5fad5105a89e17f38adcc9878685be6d78",
+			"revisionTime": "2018-01-05T21:21:14Z"
+		},
+		{
 			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
 			"path": "golang.org/x/net/context",
 			"revision": "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb",
