@@ -31,12 +31,13 @@ func (b *backend) pathAuthLogin(ctx context.Context, req *logical.Request, d *fr
 		return nil, logical.CodedError(422, err.Error())
 	}
 
-	// Make sure we have a token
+	// Make sure we have a Chef Client private key
 	key := d.Get("key").(string)
 	if key == "" {
 		return errMissingField("key"), nil
 	}
 
+	// Make sure we have a Chef Client name
 	client := d.Get("client").(string)
 	if client == "" {
 		return errMissingField("client"), nil

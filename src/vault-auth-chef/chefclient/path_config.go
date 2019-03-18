@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// pathConfigRead corresponds to READ auth/slack/config.
+// pathConfigRead corresponds to READ auth/chef/config.
 func (b *backend) pathConfigRead(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	config, err := b.Config(ctx, req.Storage)
 	if err != nil {
@@ -27,14 +27,14 @@ func (b *backend) pathConfigRead(ctx context.Context, req *logical.Request, data
 	return resp, nil
 }
 
-// pathConfigRead corresponds to POST auth/slack/config.
+// pathConfigRead corresponds to POST auth/chef/config.
 func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
 	// Validate we didn't get extraneous fields
 	if err := validateFields(req, data); err != nil {
 		return nil, logical.CodedError(422, err.Error())
 	}
 
-	// Get the access token
+	// Get the Chef Server address
 	chefServer := data.Get("chef_server").(string)
 	if chefServer == "" {
 		return errMissingField("chef_server"), nil

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/vault/version"
 )
 
-// pathInfoRead corresponds to READ auth/slack/info.
+// pathInfoRead corresponds to READ auth/chef/info.
 func (b *backend) pathInfoRead(ctx context.Context, req *logical.Request, _ *framework.FieldData) (*logical.Response, error) {
 	return &logical.Response{
 		Data: map[string]interface{}{
