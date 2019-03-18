@@ -65,7 +65,7 @@ func Backend(c *logical.BackendConfig) *backend {
 		Paths: func() []*framework.Path {
 			var paths []*framework.Path
 
-			// auth/slack/info
+			// auth/chef/info
 			paths = append(paths, &framework.Path{
 				Pattern:      "info",
 				HelpSynopsis: "Display information about the plugin",
@@ -92,12 +92,14 @@ get help.
 				HelpSynopsis: "Configuration such the chef server and ttls",
 				HelpDescription: `
 
-Read or writer configuration to Vault's storage backend such as OAuth
-information, team, behavior configuration tunables, and TTLs. For example:
+Read or writer configuration to Vault's storage backend such as Chef Server
+address, data bags path, TLS validation, default policy and TTLs. For example:
 
     $ vault write auth/chef/config \
-        chef_server="127.0.0.1" \
-        skip_tls=false
+        chef_server="https://127.0.0.1" \
+		skip_tls=false \
+		data_bags=hosts \
+		anyone_policies=chef
 
 For more information and examples, please see the online documentation.
 
@@ -106,12 +108,12 @@ For more information and examples, please see the online documentation.
 				Fields: map[string]*framework.FieldSchema{
 					"chef_server": &framework.FieldSchema{
 						Type:        framework.TypeString,
-						Description: "Slack OAuth access token for your Slack application.",
+						Description: "Chef Server address.",
 					},
 
 					"skip_tls": &framework.FieldSchema{
 						Type:        framework.TypeBool,
-						Description: "Skip checking the certificate of chef server.",
+						Description: "Skip checking the certificate of Chef Server.",
 					},
 
 					"anyone_policies": &framework.FieldSchema{
