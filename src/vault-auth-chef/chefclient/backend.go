@@ -164,6 +164,24 @@ then used to map the client to policies in Vault.
 				},
 			})
 
+			paths = append(paths, &framework.Path{
+				Pattern:         "map/roles/?",
+				HelpDescription: "Lists configured roles based mappings.",
+				HelpSynopsis:    "Lists configured roles based mappings.",
+				Callbacks: map[logical.Operation]framework.OperationFunc{
+					logical.ListOperation: b.pathRolesMapList,
+				},
+			})
+
+			paths = append(paths, &framework.Path{
+				Pattern:         "map/hosts/?",
+				HelpDescription: "Lists configured hosts based mappings.",
+				HelpSynopsis:    "Lists configured hosts based mappings.",
+				Callbacks: map[logical.Operation]framework.OperationFunc{
+					logical.ListOperation: b.pathHostsMapList,
+				},
+			})
+
 			return paths
 		}(),
 	}

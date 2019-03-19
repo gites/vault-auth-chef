@@ -65,3 +65,21 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 	}
 	return nil, nil
 }
+
+// pathRolesMapList corresponds to LIST auth/chef/map/roles.
+func (b *backend) pathRolesMapList(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+	rolesMaps, err := req.Storage.List(ctx, "map/roles/")
+	if err != nil {
+		return nil, err
+	}
+	return logical.ListResponse(rolesMaps), nil
+}
+
+// pathHostsMapList corresponds to LIST auth/chef/map/hosts.
+func (b *backend) pathHostsMapList(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
+	hostsMaps, err := req.Storage.List(ctx, "map/hosts/")
+	if err != nil {
+		return nil, err
+	}
+	return logical.ListResponse(hostsMaps), nil
+}
