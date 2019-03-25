@@ -8,7 +8,7 @@ VERSION=$(shell git describe --abbrev=0 --tags)
 COMMIT=$(shell git rev-parse --short HEAD)
 BUILD_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 BUILD_ORIGIN=$(shell git config remote.origin.url)
-LD_FLAGS=-X $(PACKAGE).BuildBranch=$(BUILD_BRANCH) -X $(PACKAGE).GitCommit=$(COMMIT) -X $(PACKAGE).Version=$(TAG) -X $(PACKAGE).BuildOrigin=$(BUILD_ORIGIN)
+LD_FLAGS=-X $(PACKAGE).BuildBranch=$(BUILD_BRANCH) -X $(PACKAGE).GitCommit=$(COMMIT) -X $(PACKAGE).Version=$(VERSION) -X $(PACKAGE).BuildOrigin=$(BUILD_ORIGIN)
 
 .PHONY: all clean systemd prepare package
 
