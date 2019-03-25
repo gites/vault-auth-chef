@@ -16,6 +16,8 @@ type config struct {
 	AnyonePolicies []string `json:"anyone_policies" structs:"anyone_policies,omitempty"`
 	// DataBags is the list of Ched Server data bags that should be checked for client data bag file.
 	DataBags []string `json:"data_bags" structs:"data_bags"`
+	// RunListSrc defines where to look for run_list informations.
+	RunListSrc string `json:"run_list_src" structs:"run_list_src"`
 
 	// TTL and MaxTTL are the default TTLs.
 	TTL    time.Duration `json:"ttl" structs:"ttl,omitempty"`

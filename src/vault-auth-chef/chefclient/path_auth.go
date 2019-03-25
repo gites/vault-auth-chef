@@ -140,41 +140,27 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		return nil, errors.Wrap(err, "auth.test")
 	}
 
-	// Get data bags
-	// Iterate over configured data bags indexes and try to find the one for our client.
-	var dataBag interface{}
-	for _, dataBagPath := range config.DataBags {
-		dataBag, err = c.DataBags.GetItem(dataBagPath, client)
-		if err != nil {
-			b.logger.Debug(fmt.Sprintf("Looking for data bag in: %s", err.Error()))
-		}
-		if err == nil {
-			break
-		}
-	}
-
-	// Check if we realy got the data bag.
-	jsonData, err := json.Marshal(dataBag)
-	if err != nil {
-		b.logger.Warn(fmt.Sprintf("Chef auth error while geting data bags: %s", err.Error()))
-		return nil, errors.Wrap(err, "data_bags.list")
-	}
-	dataBagMapRunList := gjson.GetBytes(jsonData, "run_list")
 	nodeRoles := make([]string, 0)
-	roleRe := regexp.MustCompile("^role\\[(.*)\\]$")
-	for _, role := range dataBagMapRunList.Array() {
-		b.logger.Debug(fmt.Sprintf("Client %s run_list: %s", client, role))
-		res := roleRe.FindStringSubmatch(role.String())
-		if len(res) == 2 {
-			nodeRoles = append(nodeRoles, res[1])
-		}
-	}
 
-	// Get node
+	// Get node and validate client key
 	node, err := c.Nodes.Get(client)
 	if err != nil {
 		b.logger.Warn(fmt.Sprintf("Chef auth error while get nodes: %s", err.Error()))
 		return nil, errors.Wrap(err, "nodes.list")
+	}
+
+	switch config.RunListSrc {
+	case "data":
+		nodeData := make(map[string]string, 0)
+		nodeRoles, nodeData = getRolesFromData(config.DataBags, client, c, b)
+		if nodeData == nil {
+			b.logger.Warn(fmt.Sprintf("Chef auth error while geting data bags: %s", err.Error()))
+			return nil, errors.Wrap(err, "data_bags.list")
+		}
+		node.Name = nodeData["id"]
+		node.Environment = nodeData["env"]
+	case "node":
+		nodeRoles = getRolesFromNode(node, client, c, b)
 	}
 
 	// Accumulate all policies
@@ -229,4 +215,59 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		ttl:      ttl,
 		maxTTL:   maxTTL,
 	}, nil
+}
+
+// getRolesFromData fetches client run_list from data bags
+func getRolesFromData(dataBags []string, client string, c *chef.Client, b *backend) ([]string, map[string]string) {
+	nodeRoles := make([]string, 0)
+	nodeData := make(map[string]string, 2)
+	//var node chef.Node
+	var dataBag interface{}
+	var err error
+
+	// Get data bags
+	// Iterate over configured data bags indexes and try to find the one for our client.
+
+	for _, dataBagPath := range dataBags {
+		dataBag, err = c.DataBags.GetItem(dataBagPath, client)
+		if err != nil {
+			b.logger.Debug(fmt.Sprintf("Looking for data bag in: %s", err.Error()))
+		}
+		if err == nil {
+			break
+		}
+	}
+
+	// Check if we realy got the data bag.
+	jsonData, err := json.Marshal(dataBag)
+	if err != nil {
+		return nil, nil
+	}
+	dataBagMapRunList := gjson.GetBytes(jsonData, "run_list")
+
+	roleRe := regexp.MustCompile("^role\\[(.*)\\]$")
+	for _, role := range dataBagMapRunList.Array() {
+		b.logger.Debug(fmt.Sprintf("Client %s run_list: %s", client, role))
+		res := roleRe.FindStringSubmatch(role.String())
+		if len(res) == 2 {
+			nodeRoles = append(nodeRoles, res[1])
+		}
+	}
+	nodeData["env"] = gjson.GetBytes(jsonData, "env").String()
+	nodeData["id"] = gjson.GetBytes(jsonData, "id").String()
+	return nodeRoles, nodeData
+}
+
+// getRolesFromNode fetches client run_list from node object
+func getRolesFromNode(node chef.Node, client string, c *chef.Client, b *backend) []string {
+	nodeRoles := make([]string, 0)
+	roleRe := regexp.MustCompile("^role\\[(.*)\\]$")
+	for _, role := range node.RunList {
+		b.logger.Debug(fmt.Sprintf("Client %s run_list: %s", client, role))
+		res := roleRe.FindStringSubmatch(role)
+		if len(res) == 2 {
+			nodeRoles = append(nodeRoles, res[1])
+		}
+	}
+	return nodeRoles
 }
