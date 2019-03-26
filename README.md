@@ -67,3 +67,33 @@ If you decide to use data bags as a source for client data, the data bag needs t
   ]
 }
 ```
+
+## Dynamic role to policy mapping
+
+Dynamic role to policy mapping is a feature that allows creating policy names dynamically based on metadata returned by the plugin.
+
+Following variables can be used in policy names mappings:
+- {{env}} - will be interpolated to a Chef Client Environment value
+- {{name}} - will be interpolated to a Chef Client Node Name value
+
+# Configuration
+```
+vault write auth/chef/map/roles/role_name1 policy=policy_name1_{{env}}
+vault write auth/chef/map/hosts/host_name2 policy=policy2_{{env}}
+```
+
+As per the above configuration client with role `role_name1` and Chef Environment set to `dev` will have the following policies:
+```
+vault write auth/chef/login/key key=@/etc/chef/client.pem client=example-client
+Key                                 Value
+---                                 -----
+token                               s.SWnIhr1dQNMErTlYhNYo0roC4
+token_accessor                      qCTtTYJ0md9PVxQYpWZy38HMI
+token_duration                      768h
+token_renewable                     true
+token_policies                      ["default" "policy_name1_dev"]
+identity_policies                   []
+policies                            ["default" "policy_name1_dev"]
+token_meta_chef_node_environment    dev
+token_meta_chef_node_name           example-client
+```
