@@ -2,6 +2,7 @@ package chefclient
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/fatih/structs"
@@ -40,10 +41,25 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 		return errMissingField("chef_server"), nil
 	}
 
-	// Get the data bags
-	dataBags := data.Get("data_bags").([]string)
-	if len(dataBags) == 0 {
-		return errMissingField("data_bags"), nil
+	// Get the run list source configuration
+	runListSrc := data.Get("run_list_src").(string)
+
+	var dataBags []string
+
+	switch runListSrc {
+	case "":
+		return errMissingField("run_list_src"), nil
+	case "data":
+		// Get the data bags
+		dataBags = data.Get("data_bags").([]string)
+		if len(dataBags) == 0 {
+			return errMissingField("data_bags"), nil
+		}
+		b.logger.Info("Plugin configured to use run_list from data bags.")
+	case "node":
+		b.logger.Info("Plugin configured to use run_list from node object.")
+	default:
+		return logical.ErrorResponse(fmt.Sprintf("Bad value for required field 'run_list_src'. Only 'node' or 'data' are allowed.")), nil
 	}
 
 	// Get the tunable options
@@ -59,6 +75,7 @@ func (b *backend) pathConfigWrite(ctx context.Context, req *logical.Request, dat
 		ChefServer:     chefServer,
 		SkipTLS:        skipTLS,
 		AnyonePolicies: anyonePolicies,
+		RunListSrc:     runListSrc,
 		DataBags:       dataBags,
 		TTL:            ttl,
 		MaxTTL:         maxTTL,
