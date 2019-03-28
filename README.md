@@ -23,6 +23,8 @@ Plugin contains follow configuration options:
 - `anyone_policies` - policies for apply to any clients
 - `ttl` - Duration after which authentication will expire
 - `max_ttl` - Maximum duration after which authentication will expire 
+- `run_list_src` - Describes where to look for information about client roles. For Chef node object use `node`, for data bags use `data`.
+- `data_bags` - Comma-separated list of Chef Server data bags to look for the client data bag file
 
 
 ## Installation
@@ -38,8 +40,30 @@ $ vault auth enable -path="chef" -plugin-name=vault-auth-chef plugin
 ## Configuration
 Options in `[]` are optional.
 
+# Use node object
+
 ```
-$ vault write auth/chef/config chef_server='https://yourChefServer/organizations/yourOrg/' [anyone_policies=anyone_policy1,anyone_policy2] [skip_tls=true]
+$ vault write auth/chef/config chef_server='https://yourChefServer/organizations/yourOrg/' run_list_src=node [anyone_policies=anyone_policy1,anyone_policy2] [skip_tls=true]
 $ vault write auth/chef/map/roles/role_name1 policy=policy_name1
 $ vault write auth/chef/map/hosts/host_name2 policy=host_policy2
+```
+
+# Use data bags
+```
+$ vault write auth/chef/config chef_server='https://yourChefServer/organizations/yourOrg/' run_list_src=data data_bags=hosts,vms,something [anyone_policies=anyone_policy1,anyone_policy2] [skip_tls=true]
+$ vault write auth/chef/map/roles/role_name1 policy=policy_name1
+$ vault write auth/chef/map/hosts/host_name2 policy=host_policy2
+```
+
+If you decide to use data bags as a source for client data, the data bag needs to have at least the following fields:
+```
+{
+  "id": "example-host-data-bag",
+  "env": "dev",
+  "run_list": [
+    "role[role-1]",
+    "role[role-2]",
+    "role[role-n]"
+  ]
+}
 ```

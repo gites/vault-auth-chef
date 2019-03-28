@@ -99,6 +99,7 @@ address, data bags path, TLS validation, default policy and TTLs. For example:
         chef_server="https://127.0.0.1" \
 		skip_tls=false \
 		data_bags=hosts \
+		run_list_src=data \
 		anyone_policies=chef
 
 For more information and examples, please see the online documentation.
@@ -120,6 +121,17 @@ For more information and examples, please see the online documentation.
 						Type: framework.TypeCommaStringSlice,
 						Description: "Comma-separated list of policies to apply to " +
 							"everyone, even unmapped clients.",
+					},
+
+					"data_bags": &framework.FieldSchema{
+						Type: framework.TypeCommaStringSlice,
+						Description: "Comma-separated list of Chef Serer data bags to " +
+							"look for the client data bag file.",
+					},
+
+					"run_list_src": &framework.FieldSchema{
+						Type:        framework.TypeString,
+						Description: "Describes where to look for information about client roles.",
 					},
 
 					"ttl": &framework.FieldSchema{
