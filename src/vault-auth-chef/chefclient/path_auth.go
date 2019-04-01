@@ -25,6 +25,12 @@ type verifyResp struct {
 	maxTTL time.Duration
 }
 
+// roleMapTemplates defines fields that can be templated in a role to policy mapping
+type roleMapTemplates struct {
+	env  string
+	name string
+}
+
 // pathAuthLogin accepts a user's personal OAuth token and validates the user's
 // identity to generate a Vault token.
 func (b *backend) pathAuthLogin(ctx context.Context, req *logical.Request, d *framework.FieldData) (*logical.Response, error) {
@@ -163,18 +169,26 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		nodeRoles = getRolesFromNode(node, client, c, b)
 	}
 
+	var templates roleMapTemplates
+	templates.env = node.Environment
+	templates.name = node.Name
+
 	// Accumulate all policies
 	hostsPolicies, err := b.HostsMap.Policies(ctx, req.Storage, client)
 	if err != nil {
 		b.logger.Warn(fmt.Sprintf("error while accumulate hosts policies: %s", err.Error()))
 		return nil, errors.Wrap(err, "client policies")
 	}
+	hostsPolicies = dynamicRoleMap(b, templates, hostsPolicies)
+
 	rolesPolicies, err := b.RolesMap.Policies(ctx, req.Storage, nodeRoles...)
 	if err != nil {
 		b.logger.Warn(fmt.Sprintf("error while accumulate roles policies: %s", err.Error()))
 		return nil, errors.Wrap(err, "run_list policies")
 	}
+	rolesPolicies = dynamicRoleMap(b, templates, rolesPolicies)
 	b.logger.Debug(fmt.Sprintf("Client %s role %s policy: %s", client, strings.Join(nodeRoles, ","), strings.Join(rolesPolicies, ",")))
+
 	policies := make([]string, 0, len(hostsPolicies)+len(rolesPolicies))
 	policies = append(policies, hostsPolicies...)
 	policies = append(policies, rolesPolicies...)
@@ -215,6 +229,18 @@ func (b *backend) verifyCreds(ctx context.Context, req *logical.Request, client,
 		ttl:      ttl,
 		maxTTL:   maxTTL,
 	}, nil
+}
+
+func dynamicRoleMap(b *backend, templates roleMapTemplates, polices []string) []string {
+	mappedPolices := make([]string, 0, len(polices))
+	for _, p := range polices {
+		b.logger.Debug(fmt.Sprintf("Dynamic policy mapping loop for: %s", p))
+		p = strings.Replace(p, "{{env}}", templates.env, -1)
+		p = strings.Replace(p, "{{name}}", templates.name, -1)
+		b.logger.Debug(fmt.Sprintf("Policy mapped to: %s", p))
+		mappedPolices = append(mappedPolices, p)
+	}
+	return mappedPolices
 }
 
 // getRolesFromData fetches client run_list from data bags
